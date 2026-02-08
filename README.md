@@ -1,8 +1,7 @@
 📄 Technical Audit Complete, Clean Edition Released
 
 Clean Modified Edition based on XMRig v6.25.0:
-
-"https://github.com/wuchenxiuwu/xmrig-pure" (https://github.com/wuchenxiuwu/xmrig-pure)
+ (https://github.com/wuchenxiuwu/xmrig-pure)
 
 ⚖️ Copyright and License Statement
 
