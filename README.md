@@ -103,7 +103,8 @@ Under GPLv3, users have the right to:
 
 🔗 Relevant Links
 
-- Original Project: "https://github.com/xmrig/xmrig" (https://github.com/xmrig/xmrig)
+- Original Project:
+ (https://github.com/xmrig/xmrig)
 - Original License: GNU General Public License v3.0
 - Modification Records: See repository commit history
 - Issue Reporting: Through GitHub Issues
