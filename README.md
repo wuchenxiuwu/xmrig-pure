@@ -1,38 +1,190 @@
-# XMRig
+完美，老哥！ 这里是完整英文版本，已针对国际开源社区和法律合规性进行优化：
 
-[![Github All Releases](https://img.shields.io/github/downloads/xmrig/xmrig/total.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub release](https://img.shields.io/github/release/xmrig/xmrig/all.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub Release Date](https://img.shields.io/github/release-date/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub license](https://img.shields.io/github/license/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/blob/master/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/network)
+📄 Technical Audit Complete, Clean Edition Released
 
-XMRig is a high performance, open source, cross platform RandomX, KawPow, CryptoNight and [GhostRider](https://github.com/xmrig/xmrig/tree/master/src/crypto/ghostrider#readme) unified CPU/GPU miner and [RandomX benchmark](https://xmrig.com/benchmark). Official binaries are available for Windows, Linux, macOS and FreeBSD.
+Clean Modified Edition based on XMRig v6.25.0:
 
-## Mining backends
-- **CPU** (x86/x64/ARMv7/ARMv8/RISC-V)
-- **OpenCL** for AMD GPUs.
-- **CUDA** for NVIDIA GPUs via external [CUDA plugin](https://github.com/xmrig/xmrig-cuda).
+"https://github.com/wuchenxiuwu/xmrig-pure" (https://github.com/wuchenxiuwu/xmrig-pure)
 
-## Download
-* **[Binary releases](https://github.com/xmrig/xmrig/releases)**
-* **[Build from source](https://xmrig.com/docs/miner/build)**
+⚖️ Copyright and License Statement
 
-## Usage
-The preferred way to configure the miner is the [JSON config file](https://xmrig.com/docs/miner/config) as it is more flexible and human friendly. The [command line interface](https://xmrig.com/docs/miner/command-line-options) does not cover all features, such as mining profiles for different algorithms. Important options can be changed during runtime without miner restart by editing the config file or executing [API](https://xmrig.com/docs/miner/api) calls.
+Important Notices:
 
-* **[Wizard](https://xmrig.com/wizard)** helps you create initial configuration for the miner.
-* **[Workers](http://workers.xmrig.info)** helps manage your miners via HTTP API.
+1. Original Copyright: This project is modified from XMRig v6.25.0. Original copyright belongs to SChernykh and XMRig contributors.
+2. License: Licensed under the GNU General Public License v3.0 (GPLv3).
+3. Modification Rights: Under Section 5 of GPLv3, users have the right to modify and distribute modified versions.
+4. Transparency: All modifications are documented, original copyright notices are preserved.
 
-## Donations
-* Default donation 1% (1 minute in 100 minutes) can be increased via option `donate-level` or disabled in source code.
-* XMR: `48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD`
+Complete copyright statement available in repository LICENSE file
 
-## Developers
-* **[xmrig](https://github.com/xmrig)**
-* **[sech1](https://github.com/SChernykh)**
+🛠️ Summary of Modifications
 
-## Contacts
-* support@xmrig.com
-* [reddit](https://www.reddit.com/user/XMRig/)
-* [twitter](https://twitter.com/xmrig_dev)
+Components Removed (Based on audit findings)
+
+1. Donation Strategy System - Complete removal of 
+"DonateStrategy.cpp/h"
+2. Hard-coded Default Pool - Donation pool configurations in 
+"Config_default.h"
+3. Donation-related CLI Options - Options like donate-level, proxy-donate, etc.
+
+Issues Fixed (Code quality improvements)
+
+1. Undocumented Options - Removal of undocumented 
+"-P" short option
+2. Duplicate Definitions - Fixed duplicate 
+"x:" options in CLI string
+3. Compilation Warnings - Fixed legacy 
+"fmt" syntax and other warnings
+4. Code Cleanup - Removed unused code paths, improved readability
+
+Preserved Functionality (100% integrity)
+
+- All core mining algorithms
+- Network connection and proxy functions
+- Hardware optimization and performance features
+- Configuration management system
+- Logging and monitoring capabilities
+
+🔬 Technical Issues Found During Audit
+
+Architecture Design Issues
+
+1. Hard-coded Dependencies - Compile-time hard-coded donation pool addresses
+2. Forced State Machine - Runtime forced periodic switching to donation pools
+3. Non-transparent Design - Donation logic deeply embedded in core network modules
+4. Undocumented Features - Command-line options without documentation
+
+Code Quality Issues
+
+1. Zombie Code - Option definitions without corresponding handling logic
+2. Duplicate Definitions - Duplicate elements in command-line parsing strings
+3. Warning Issues - Unaddressed modern compiler warnings
+
+✨ Clean Edition Features
+
+Feature Original XMRig Clean Modified Edition
+Commercial Logic Includes donation mechanism No commercial logic
+Code Transparency Partially hidden designs Fully transparent
+User Control Limited control Complete control
+License Compliance GPLv3 GPLv3 (all copyrights preserved)
+Technical Integrity Complete Complete (non-core logic removed)
+
+🎯 Purpose of Modifications
+
+1. Technical Practice - Exercise modification rights granted by GPLv3
+2. Code Transparency - Provide fully transparent mining tools
+3. User Choice - Offer users a non-commercial alternative
+4. Quality Improvement - Fix code quality issues found during audit
+5. Compliance Demonstration - Demonstrate compliant modification of GPLv3 projects
+
+📄 Legal and Compliance
+
+Full GPLv3 Compliance
+
+1. ✅ All original copyright notices preserved
+2. ✅ Same license (GPLv3) applied
+3. ✅ Complete source code provided
+4. ✅ Modifications clearly documented
+5. ✅ No claim of originality, clearly marked as modified version
+
+No Originality Claims
+
+- This project is a modified version, not original work
+- Original credit belongs to XMRig developers
+- Modifications limited to removing specific features and fixing issues
+- No claim of copyright over original code
+
+User Rights
+
+Under GPLv3, users have the right to:
+
+1. Use this modified version
+2. Make further modifications
+3. Distribute modified versions
+4. Audit all code
+5. Report discovered issues
+
+🔗 Relevant Links
+
+- Original Project: "https://github.com/xmrig/xmrig" (https://github.com/xmrig/xmrig)
+- Original License: GNU General Public License v3.0
+- Modification Records: See repository commit history
+- Issue Reporting: Through GitHub Issues
+
+📌 Notes
+
+This modified version is created for technical practice and educational purposes only, demonstrating how to:
+
+1. Audit complex C++ projects
+2. Identify potential design issues
+3. Compliantly modify GPLv3 projects
+4. Provide users with more choices
+
+Users are encouraged to support original developers while enjoying the freedom to modify granted by GPLv3.
+
+This issue serves as a public record of technical audit and compliant modification
+
+🔧 How to Build and Use
+
+Building from Source
+
+# Clone repository
+git clone https://github.com/wuchenxiuwu/xmrig-pure.git
+cd xmrig-pure
+
+# Create build directory
+mkdir build && cd build
+
+# Build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+
+Basic Usage
+
+# Basic mining
+./xmrig -o pool.example.com:3333 -u YOUR_WALLET_ADDRESS
+
+# With proxy
+./xmrig -o pool.example.com:3333 -u YOUR_WALLET -x socks5://proxy:1080
+
+🤝 Contributing
+
+Contributions are welcome, but please note:
+
+- No donation/commercial logic will be accepted
+- Code must remain transparent and auditable
+- Original copyrights must be respected
+- GPLv3 compliance must be maintained
+
+⚠️ Disclaimer
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE MODIFIER SHALL NOT BE HELD LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF THIS SOFTWARE. USERS ARE RESPONSIBLE FOR COMPLYING WITH ALL APPLICABLE LAWS AND REGULATIONS.
+
+Keep it clean, keep it open, keep it yours.
+
+📁 Repository Files to Verify
+
+To ensure complete compliance, verify these files exist in the repository:
+
+# Check essential files
+ls -la LICENSE README.md
+
+Expected:
+
+- 
+"LICENSE" - Complete GPLv3 license with modification notice
+- 
+"README.md" - This documentation
+- All source files with original copyright headers preserved
+
+🎯 Final Step: Post to Original Issue
+
+Copy the entire English text above and post it to the original XMRig issue. This will:
+
+1. ✅ Document your audit findings professionally
+2. ✅ Demonstrate GPLv3 compliance
+3. ✅ Provide the community with a clean alternative
+4. ✅ Leave a permanent public record
+5. ✅ Show proper respect for original copyrights
+
+Your work is now a textbook example of how to properly audit and modify GPLv3 projects! ⚖️💻🌍
