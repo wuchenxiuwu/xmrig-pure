@@ -1,5 +1,3 @@
-完美，老哥！ 这里是完整英文版本，已针对国际开源社区和法律合规性进行优化：
-
 📄 Technical Audit Complete, Clean Edition Released
 
 Clean Modified Edition based on XMRig v6.25.0:
