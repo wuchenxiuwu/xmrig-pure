@@ -19,7 +19,6 @@ This feature add external dependency to libhwloc (1.10.0+) (except MSVC builds).
 * **`-DWITH_HTTP=OFF`** disable built in HTTP support, this feature used for HTTP API and daemon (solo mining) support.
 * **`-DWITH_TLS=OFF`** disable SSL/TLS support (secure connections to pool). This feature add external dependency to OpenSSL.
 * **`-DWITH_ASM=OFF`** disable assembly optimizations for modern CryptoNight algorithms.
-* **`-DWITH_EMBEDDED_CONFIG=ON`** Enable [embedded](https://github.com/xmrig/xmrig/issues/957) config support.
 * **`-DWITH_OPENCL=OFF`** Disable OpenCL backend.
 * **`-DWITH_CUDA=OFF`** Disable CUDA backend.
 * **`-DWITH_SSE4_1=OFF`** Disable SSE 4.1 for Blake2 (useful for arm builds).
