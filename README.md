@@ -1,176 +1,279 @@
-📄 Technical Audit Complete, Clean Edition Released
+🧹 XMRig-Pure: 完全纯净的挖矿工具
 
-Clean Modified Edition based on XMRig v6.25.0:
- (https://github.com/wuchenxiuwu/xmrig-pure)
+基于 XMRig v6.25.0 的彻底净化版本
 
-⚖️ Copyright and License Statement
+"https://github.com/wuchenxiuwu/xmrig-pure" (https://github.com/wuchenxiuwu/xmrig-pure)
 
-Important Notices:
+🎯 一句话介绍
 
-1. Original Copyright: This project is modified from XMRig v6.25.0. Original copyright belongs to SChernykh and XMRig contributors.
-2. License: Licensed under the GNU General Public License v3.0 (GPLv3).
-3. Modification Rights: Under Section 5 of GPLv3, users have the right to modify and distribute modified versions.
-4. Transparency: All modifications are documented, original copyright notices are preserved.
+XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计和未文档化功能的 XMRig 纯净版本，100% 算力归用户，0% 隐藏抽成。
 
-Complete copyright statement available in repository LICENSE file
+⚖️ 法律与版权声明
 
-🛠️ Summary of Modifications
+核心原则
 
-Components Removed (Based on audit findings)
+1. 原始版权：本项目基于 XMRig v6.25.0 修改，原始代码版权归 SChernykh 及 XMRig 贡献者所有
+2. 许可证：遵循 GNU General Public License v3.0 (GPLv3) 协议
+3. 修改权利：依据 GPLv3 第5条，用户有权修改、分发修改版本
+4. 透明原则：所有修改已明确标注，原始版权声明完整保留
 
-1. Donation Strategy System - Complete removal of 
-"DonateStrategy.cpp/h"
-2. Hard-coded Default Pool - Donation pool configurations in 
-"Config_default.h"
-3. Donation-related CLI Options - Options like donate-level, proxy-donate, etc.
+重要声明
 
-Issues Fixed (Code quality improvements)
+- ❌ 不声明原创：本版本为修改版，非原创作品
+- ✅ 完全合规：严格遵守 GPLv3 要求
+- 📁 源码公开：所有修改均可审计验证
+- ⚖️ 责任免除：本软件按"原样"提供，不承担任何责任
 
-1. Undocumented Options - Removal of undocumented 
-"-P" short option
-2. Duplicate Definitions - Fixed duplicate 
-"x:" options in CLI string
-3. Compilation Warnings - Fixed legacy 
-"fmt" syntax and other warnings
-4. Code Cleanup - Removed unused code paths, improved readability
+完整许可证见仓库 LICENSE 文件
 
-Preserved Functionality (100% integrity)
+🔪 我们移除了什么
 
-- All core mining algorithms
-- Network connection and proxy functions
-- Hardware optimization and performance features
-- Configuration management system
-- Logging and monitoring capabilities
+1. 捐赠系统（完全切除）
 
-🔬 Technical Issues Found During Audit
+- ✅ 捐赠策略系统 - 删除 
+"DonateStrategy.cpp/h" 文件
+- ✅ 硬编码捐赠矿池 - 删除 
+"Config_default.h" 中的硬编码地址
+- ✅ 捐赠相关命令行选项 - 移除 
+"donate-level"、
+"proxy-donate" 等选项
+- ✅ 捐赠状态机逻辑 - 删除运行时强制切换到捐赠矿池的代码
 
-Architecture Design Issues
+2. 硬编码机制（连根拔起）
 
-1. Hard-coded Dependencies - Compile-time hard-coded donation pool addresses
-2. Forced State Machine - Runtime forced periodic switching to donation pools
-3. Non-transparent Design - Donation logic deeply embedded in core network modules
-4. Undocumented Features - Command-line options without documentation
+- ✅ 硬编码默认配置 - 删除整个 
+"Config_default.h" 文件
+- ✅ CMake 隐藏开关 - 移除 
+"WITH_EMBEDDED_CONFIG" 选项
+- ✅ 条件编译块 - 删除 
+"Base.cpp" 中的相关代码块
+- ✅ 未处理宏定义 - 清理 
+"XMRIG_FEATURE_EMBEDDED_CONFIG" 相关代码
 
-Code Quality Issues
+3. 代码质量问题（修复完善）
 
-1. Zombie Code - Option definitions without corresponding handling logic
-2. Duplicate Definitions - Duplicate elements in command-line parsing strings
-3. Warning Issues - Unaddressed modern compiler warnings
+- ✅ 未文档化选项 - 移除未说明的 
+"-P" 短选项
+- ✅ 重复定义 - 修复命令行字符串中的重复 
+"x:" 选项
+- ✅ 编译警告 - 修复 
+"fmt" 库旧语法等警告
+- ✅ 僵尸代码 - 清理无对应处理逻辑的代码
 
-✨ Clean Edition Features
+🔧 我们保留了什么
 
-Feature Original XMRig Clean Modified Edition
-Commercial Logic Includes donation mechanism No commercial logic
-Code Transparency Partially hidden designs Fully transparent
-User Control Limited control Complete control
-License Compliance GPLv3 GPLv3 (all copyrights preserved)
-Technical Integrity Complete Complete (non-core logic removed)
+100% 完整的功能
 
-🎯 Purpose of Modifications
+- ✅ 所有核心挖矿算法 - RandomX、CryptoNight、Argon2 等
+- ✅ 完整网络功能 - 代理支持、TLS 加密、连接池
+- ✅ 硬件优化 - CPU/GPU 优化、大页面支持
+- ✅ 配置管理 - JSON 配置、命令行参数、环境变量
+- ✅ 监控日志 - 完整日志系统、性能监控
+- ✅ 构建系统 - 完整 CMake 构建支持
 
-1. Technical Practice - Exercise modification rights granted by GPLv3
-2. Code Transparency - Provide fully transparent mining tools
-3. User Choice - Offer users a non-commercial alternative
-4. Quality Improvement - Fix code quality issues found during audit
-5. Compliance Demonstration - Demonstrate compliant modification of GPLv3 projects
+技术完整性
 
-📄 Legal and Compliance
+功能 状态 说明
+挖矿算法 ✅ 完整 所有原版算法
+网络协议 ✅ 完整 HTTP/HTTPS、代理
+硬件支持 ✅ 完整 CPU、OpenCL、CUDA
+配置系统 ✅ 完整 文件、命令行、API
+监控日志 ✅ 完整 控制台、文件、系统日志
+构建系统 ✅ 完整 CMake、跨平台
 
-Full GPLv3 Compliance
+🎯 为什么需要这个版本
 
-1. ✅ All original copyright notices preserved
-2. ✅ Same license (GPLv3) applied
-3. ✅ Complete source code provided
-4. ✅ Modifications clearly documented
-5. ✅ No claim of originality, clearly marked as modified version
+审计发现的技术问题
 
-No Originality Claims
+1. 硬编码捐赠矿池 - 编译时硬编码 
+"donate.v2.xmrig.com"
+2. 强制捐赠状态机 - 运行时周期性强制切换到捐赠矿池
+3. 架构不透明 - 捐赠逻辑深度侵入网络核心模块
 
-- This project is a modified version, not original work
-- Original credit belongs to XMRig developers
-- Modifications limited to removing specific features and fixing issues
-- No claim of copyright over original code
+🚀 快速开始
 
-User Rights
+1. 获取源码
 
-Under GPLv3, users have the right to:
-
-1. Use this modified version
-2. Make further modifications
-3. Distribute modified versions
-4. Audit all code
-5. Report discovered issues
-
-🔗 Relevant Links
-
-- Original Project:
- (https://github.com/xmrig/xmrig)
-- Original License: GNU General Public License v3.0
-- Modification Records: See repository commit history
-- Issue Reporting: Through GitHub Issues
-
-📌 Notes
-
-This modified version is created for technical practice and educational purposes only, demonstrating how to:
-
-1. Audit complex C++ projects
-2. Identify potential design issues
-3. Compliantly modify GPLv3 projects
-4. Provide users with more choices
-
-Users are encouraged to support original developers while enjoying the freedom to modify granted by GPLv3.
-
-This issue serves as a public record of technical audit and compliant modification
-
-🔧 How to Build and Use
-
-Building from Source
-
-# Clone repository
 git clone https://github.com/wuchenxiuwu/xmrig-pure.git
 cd xmrig-pure
 
-# Create build directory
-mkdir build && cd build
+2. 编译构建
 
-# Build
+mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 
-Basic Usage
+3. 基本使用
 
-# Basic mining
+# 直接挖矿
 ./xmrig -o pool.example.com:3333 -u YOUR_WALLET_ADDRESS
 
-# With proxy
+# 使用代理
 ./xmrig -o pool.example.com:3333 -u YOUR_WALLET -x socks5://proxy:1080
 
-🤝 Contributing
+# 配置文件
+./xmrig -c config.json
 
-Contributions are welcome, but please note:
+📊 技术对比
 
-- No donation/commercial logic will be accepted
-- Code must remain transparent and auditable
-- Original copyrights must be respected
-- GPLv3 compliance must be maintained
+功能对比表
 
-⚠️ Disclaimer
+特性 原版 XMRig XMRig-Pure
+捐赠抽成 默认 1%，可调 0%，无此功能
+硬编码矿池 有，需 CMake 关闭 无，已删除
+捐赠状态机 有，强制切换 无，已删除
+未文档化选项 存在（如 
+"-P"） 已修复/移除
+代码透明度 部分隐藏 完全透明
+用户配置复杂度 高（需注意开关） 低（开箱即用）
+二进制纯净度 需配置保证 天然纯净
 
-THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE MODIFIER SHALL NOT BE HELD LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF THIS SOFTWARE. USERS ARE RESPONSIBLE FOR COMPLYING WITH ALL APPLICABLE LAWS AND REGULATIONS.
+性能对比
 
-Keep it clean, keep it open, keep it yours.
+- ⚡ 算力相同：核心挖矿算法无修改
+- 📉 资源占用略低：移除了捐赠相关逻辑
+- 🔧 代码更简洁：减少了条件编译和状态判断
+- 🏗️ 架构更清晰：无捐赠逻辑侵入核心模块
 
-📁 Repository Files to Verify
+🔍 审计与修改记录
 
-To ensure complete compliance, verify these files exist in the repository:
+完整的审计过程
 
-# Check essential files
+1. 发现问题：未文档化命令行选项、重复定义
+2. 深度审计：分析捐赠系统架构、硬编码设计
+3. 代码修复：移除捐赠逻辑、清理僵尸代码
+4. 构建净化：移除相关 CMake 选项
+5. 文档同步：清理过时文档说明
+6. 完整测试：验证功能完整性和性能
+
+技术修改摘要
+
+# 查看完整修改记录
+git log --oneline --graph
+
+所有修改均公开可审计，符合 GPLv3 要求
+
+⚖️ 法律合规性
+
+完全遵守 GPLv3
+
+1. ✅ 保留所有原始版权声明
+2. ✅ 使用相同许可证 (GPLv3)
+3. ✅ 提供完整源代码
+4. ✅ 明确标注修改内容
+5. ✅ 不声明原创代码所有权
+
+用户权利
+
+依据 GPLv3，用户有权：
+
+1. 使用 本修改版本
+2. 修改 代码进行个性化调整
+3. 分发 修改后的版本
+4. 审计 所有源代码
+5. 报告 发现的问题
+
+🤝 贡献指南
+
+欢迎贡献，但请注意：
+
+接受的内容
+
+- ✅ 性能优化和改进
+- ✅ 新算法支持
+- ✅ 文档改进
+- ✅ Bug 修复
+- ✅ 安全性增强
+
+不接受的内容
+
+- ❌ 任何形式的捐赠/商业逻辑
+- ❌ 隐藏功能或后门
+- ❌ 降低透明度的设计
+- ❌ 违反 GPLv3 的修改
+
+开发原则
+
+1. 透明第一：所有代码清晰可读
+2. 用户主权：用户完全控制工具
+3. 代码质量：保持高标准和可维护性
+4. 合规合法：严格遵守开源协议
+
+📁 文件验证
+
+为确保完整性，仓库包含：
+
+# 关键文件验证
 ls -la LICENSE README.md
 
-Expected:
+必须包含：
 
 - 
-"LICENSE" - Complete GPLv3 license with modification notice
+"LICENSE" - 完整 GPLv3 许可证文本
 - 
-"README.md" - This documentation
-- All source files with original copyright headers preserved
+"README.md" - 本说明文档
+- 所有源码文件（保留原始版权声明）
+
+🎯 项目目标
+
+技术目标
+
+1. 提供 100% 纯净的挖矿工具
+2. 保持与原版的功能兼容性
+3. 提高代码质量和可维护性
+4. 确保完全透明和可审计
+
+社区目标
+
+1. 展示开源项目审计的价值
+2. 提供用户真正的选择自由
+3. 推动开源工具的透明度标准
+4. 教育社区代码审计方法
+
+哲学目标
+
+1. 用户主权：工具应服务用户，而非相反
+2. 完全透明：所有功能应清晰可见
+3. 简单直接：无需复杂配置即可获得最佳体验
+4. 持续净化：保持项目的纯净本质
+
+⚠️ 免责声明
+
+本软件按"原样"提供，不附带任何明示或暗示的保证。使用者需自行承担所有风险。
+
+使用者需确保遵守所有适用的法律法规，包括但不限于：
+
+- 当地加密货币挖矿法规
+- 电力使用和碳排放规定
+- 网络使用政策
+- 税务申报义务
+
+开发者对因使用本软件造成的任何直接或间接损失不承担任何责任。
+
+🔗 相关链接
+
+- 原始项目: "https://github.com/xmrig/xmrig" (https://github.com/xmrig/xmrig)
+- 原始许可证: GNU General Public License v3.0
+- 修改记录: 查看仓库提交历史
+- 问题反馈: 通过 GitHub Issues
+- 技术讨论: 基于代码和事实
+
+📌 最后的话
+
+XMRig-Pure 的存在证明：
+
+1. 用户有权审计所使用的工具
+2. 开源协议赋予真实的修改权利
+3. 代码质量与透明度至关重要
+4. 社区可以通过行动推动改进
+
+这不是"另一个分支"，而是一个明确的选择：
+
+- 选择完全控制，而非部分控制
+- 选择透明设计，而非隐藏逻辑
+- 选择简单纯净，而非复杂妥协
+- 选择用户主权，而非工具主导
+
+保持纯净，保持控制，保持挖矿。
+
+XMRig-Pure - 当你说"不"时，工具真的会听。
