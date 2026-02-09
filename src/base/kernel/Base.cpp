@@ -140,14 +140,6 @@ private:
             return config.release();
         }
 
-#       ifdef XMRIG_FEATURE_EMBEDDED_CONFIG
-        chain.addRaw(default_config);
-
-        if (read(chain, config)) {
-            return config.release();
-        }
-#       endif
-
         return nullptr;
     }
 };
