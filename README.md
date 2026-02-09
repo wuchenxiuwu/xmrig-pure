@@ -43,7 +43,7 @@ XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 纯净版本�
 
 - ✅ 硬编码默认配置 - 删除整个 
 "Config_default.h" 文件
-- ✅ CMake 隐藏开关 - 移除 
+- ✅ CMake 开关 - 移除 
 "WITH_EMBEDDED_CONFIG" 选项
 - ✅ 条件编译块 - 删除 
 "Base.cpp" 中的相关代码块
