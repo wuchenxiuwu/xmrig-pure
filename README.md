@@ -44,17 +44,22 @@ XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 移除捐赠�
 "Config_default.h" 文件
 ✅ CMake 开关 - 移除 
 "WITH_EMBEDDED_CONFIG" 选项
+
 ✅捐赠进度显示
 Summary.cpp
+
 ✅以及删除有捐赠相关的逻辑，具体列出文件
 Miner.cpp
 Miner.h
 Base.cpp
 Pools.cpp, Pools.h
+
 ✅与捐赠相关的键映射
 IConfig.h Config_platform.h
+
 ✅网络通信层，捐赠相关代码移除
 Network.cpp, Network.h
+
 程序帮助删除了与帮助相关的指令
 usage.h
 ----------------------
