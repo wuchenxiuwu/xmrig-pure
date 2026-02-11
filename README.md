@@ -1,12 +1,11 @@
 🧹 XMRig-Pure: 完全纯净的挖矿工具
 
-基于 XMRig v6.25.0 的彻底净化版本
-
-"https://github.com/wuchenxiuwu/xmrig-pure" (https://github.com/wuchenxiuwu/xmrig-pure)
+基于 XMRig v6.25.0 的移除捐赠版本
+ (https://github.com/wuchenxiuwu/xmrig-pure)
 
 🎯 一句话介绍
 
-XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 纯净版本，100% 算力归用户，0% 隐藏抽成。
+XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 移除捐赠版本，100% 算力归用户，0% 隐藏抽成。
 
 ⚖️ 法律与版权声明
 
@@ -93,10 +92,11 @@ XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 纯净版本�
 🚀 快速开始
 
 1. 获取源码
-
+---------------------
 git clone https://github.com/wuchenxiuwu/xmrig-pure.git
-cd xmrig-pure
 
+cd xmrig-pure
+---------------------
 2. 编译构建
 
 mkdir build && cd build
@@ -189,8 +189,9 @@ git log --oneline --graph
 为确保完整性，仓库包含：
 
 # 关键文件验证
+--------------
 ls -la LICENSE README.md
-
+--------------
 必须包含：
 
 - 
@@ -237,8 +238,9 @@ ls -la LICENSE README.md
 
 🔗 相关链接
 
-- 原始项目: "https://github.com/xmrig/xmrig" (https://github.com/xmrig/xmrig)
+- 原始项目: (https://github.com/xmrig/xmrig)
 - 原始许可证: GNU General Public License v3.0
+--------------
 - 修改记录: 查看仓库提交历史
 - 问题反馈: 通过 GitHub Issues
 - 技术讨论: 基于代码和事实
