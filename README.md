@@ -3,7 +3,7 @@
 基于 XMRig v6.25.0 的移除捐赠版本
  (https://github.com/wuchenxiuwu/xmrig-pure)
 
-🎯 一句话介绍
+🎯 介绍
 
 XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 移除捐赠版本，100% 算力归用户，0% 隐藏抽成。
 
