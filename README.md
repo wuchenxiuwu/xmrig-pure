@@ -47,8 +47,9 @@ XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 移除捐赠�
 
 
 ✅捐赠进度显示
-Summary.cpp
 
+Summary.cpp
+------------
 ✅以及删除有捐赠相关的逻辑，具体列出文件
 Miner.cpp
 Miner.h
