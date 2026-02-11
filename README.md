@@ -51,7 +51,7 @@ Miner.cpp
 Miner.h
 Base.cpp
 Pools.cpp, Pools.h
-与捐赠相关的键映射
+✅与捐赠相关的键映射
 IConfig.h Config_platform.h
 ✅网络通信层，捐赠相关代码移除
 Network.cpp, Network.h
