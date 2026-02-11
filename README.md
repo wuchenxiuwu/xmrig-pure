@@ -45,6 +45,7 @@ XMRig-Pure 是移除了所有捐赠逻辑、硬编码设计 XMRig 移除捐赠�
 ✅ CMake 开关 - 移除 
 "WITH_EMBEDDED_CONFIG" 选项
 
+
 ✅捐赠进度显示
 Summary.cpp
 
