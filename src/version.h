@@ -9,13 +9,13 @@
 #define XMRIG_VERSION_H
 
 #define APP_ID        "xmrig"
-#define APP_NAME      "XMRig纯净版"
-#define APP_DESC      "XMRig 纯净挖矿程序"
+#define APP_NAME      "XMRig"
+#define APP_DESC      "XMRig"
 #define APP_VERSION   "6.25.0"
 #define APP_DOMAIN    "xmrig.com"
 #define APP_SITE      "www.xmrig.com"
-#define APP_COPYRIGHT "版权所有 (C) 2016-2025 xmrig.com｜捐赠功能已移除"
-#define APP_KIND      "矿工"
+#define APP_COPYRIGHT "Copyright (C) 2016-2025 xmrig.com"
+#define APP_KIND      "miner"
 
 #define APP_VER_MAJOR  6
 #define APP_VER_MINOR  25
