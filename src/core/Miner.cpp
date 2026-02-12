@@ -1,7 +1,7 @@
 /* XMRig
  * Copyright (c) 2018-2021 SChernykh   <https://github.com/SChernykh>
  * Copyright (c) 2016-2021 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
- *
+ * Copyright 2026 wuchenxiuwu <https://github.com/wuchenxiuwu>
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -70,7 +70,7 @@
 namespace xmrig {
 
 
-static std::mutex mutex;
+static std::recursive_mutex mutex;  // 改为递归锁
 
 
 class MinerPrivate
@@ -116,13 +116,20 @@ public:
 
     inline void handleJobChange()
     {
-            Nonce::reset(0);
+        // 简化的nonce暂停逻辑
+        if (!enabled) {
+            Nonce::pause(true);
+        }
 
         for (IBackend *backend : backends) {
             backend->setJob(job);
         }
 
         Nonce::touch();
+
+        if (active && enabled) {
+            Nonce::pause(false);
+        }
 
         if (ticks == 0) {
             ticks++;
@@ -275,6 +282,8 @@ public:
 
     void printHashrate(bool details)
     {
+        std::lock_guard<std::recursive_mutex> lock(mutex);
+        
         char num[16 * 5] = { 0 };
         std::pair<bool, double> speed[3] = { { true, 0.0 }, { true, 0.0 }, { true, 0.0 } };
         uint32_t count   = 0;
@@ -425,32 +434,35 @@ xmrig::Miner::~Miner()
 
 bool xmrig::Miner::isEnabled() const
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     return d_ptr->enabled;
 }
 
 
 bool xmrig::Miner::isEnabled(const Algorithm &algorithm) const
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     return std::find(d_ptr->algorithms.begin(), d_ptr->algorithms.end(), algorithm) != d_ptr->algorithms.end();
 }
 
 
 const xmrig::Algorithms &xmrig::Miner::algorithms() const
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     return d_ptr->algorithms;
 }
 
 
 const std::vector<xmrig::IBackend *> &xmrig::Miner::backends() const
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     return d_ptr->backends;
 }
 
 
 xmrig::Job xmrig::Miner::job() const
 {
-    std::lock_guard<std::mutex> lock(mutex);
-
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     return d_ptr->job;
 }
 
@@ -492,15 +504,20 @@ void xmrig::Miner::execCommand(char command)
 
 void xmrig::Miner::pause()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     d_ptr->active = false;
     d_ptr->m_taskbar.setActive(false);
 
+    Nonce::pause(true);
     Nonce::touch();
 }
 
 
 void xmrig::Miner::setEnabled(bool enabled)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     if (d_ptr->enabled == enabled) {
         return;
     }
@@ -530,6 +547,7 @@ void xmrig::Miner::setEnabled(bool enabled)
         return;
     }
 
+    Nonce::pause(!enabled);
     Nonce::touch();
 }
 
@@ -546,23 +564,36 @@ void xmrig::Miner::setJob(const Job &job)
             stop();
         }
         else {
+            Nonce::pause(true);
             Nonce::touch();
         }
     }
 #   endif
 
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     d_ptr->algorithm = job.algorithm();
-
-    mutex.lock();
-
-    d_ptr->job   = job;
+    
+    // 智能判断是否重置nonce
+    bool needReset = false;
+    
+    // 情况1：算法不同，必须重置
+    if (d_ptr->job.algorithm() != job.algorithm()) {
+        needReset = true;
+    }
+    // 情况2：blob不同，必须重置
+    else if (!d_ptr->job.isEqualBlob(job)) {
+        needReset = true;
+    }
+    
+    d_ptr->job = job;
 
 #   ifdef XMRIG_ALGO_RANDOMX
     const bool ready = d_ptr->initRX();
-
-    // Always reset nonce on RandomX dataset change
+    
+    // RandomX数据集未准备好，强制重置
     if (!ready) {
-       Nonce::reset(0); 
+        needReset = true;
     }
 #   else
     constexpr const bool ready = true;
@@ -574,7 +605,10 @@ void xmrig::Miner::setJob(const Job &job)
     }
 #   endif
 
-    mutex.unlock();
+    // 在锁内执行重置（保证原子性）
+    if (needReset) {
+        Nonce::reset(0);
+    }
 
     d_ptr->active = true;
     d_ptr->m_taskbar.setActive(true);
@@ -587,16 +621,23 @@ void xmrig::Miner::setJob(const Job &job)
 
 void xmrig::Miner::stop()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     Nonce::stop();
 
     for (IBackend *backend : d_ptr->backends) {
         backend->stop();
     }
+    
+    d_ptr->active = false;
+    d_ptr->m_taskbar.setActive(false);
 }
 
 
 void xmrig::Miner::onConfigChanged(Config *config, Config *previousConfig)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     d_ptr->rebuild();
 
     if (config->pools() != previousConfig->pools() && config->pools().active() > 0) {
@@ -613,6 +654,8 @@ void xmrig::Miner::onConfigChanged(Config *config, Config *previousConfig)
 
 void xmrig::Miner::onTimer(const Timer *)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     double maxHashrate          = 0.0;
     const auto config           = d_ptr->controller->config();
     const auto healthPrintTime  = config->healthPrintTime();
@@ -652,7 +695,23 @@ void xmrig::Miner::onTimer(const Timer *)
 
             state = pause;
             d_ptr->auto_pause += pause ? 1 : -1;
-            setEnabled(d_ptr->auto_pause == 0);
+            
+            // 注意：这里直接修改状态，不调用setEnabled，避免死锁
+            d_ptr->enabled = (d_ptr->auto_pause == 0);
+            d_ptr->m_taskbar.setEnabled(d_ptr->enabled);
+            
+            if (d_ptr->active) {
+                Nonce::pause(!d_ptr->enabled);
+                Nonce::touch();
+            }
+            
+            // 日志输出
+            if (d_ptr->enabled) {
+                LOG_INFO("%s " GREEN_BOLD("resumed (auto)"), Tags::miner());
+            }
+            else {
+                LOG_INFO("%s " YELLOW_BOLD("paused (auto)"), Tags::miner());
+            }
         }
     };
 
@@ -665,7 +724,13 @@ void xmrig::Miner::onTimer(const Timer *)
     }
 
     if (stopMiner) {
-        stop();
+        // 直接调用stop，因为已经在锁内
+        Nonce::stop();
+        for (IBackend *backend : d_ptr->backends) {
+            backend->stop();
+        }
+        d_ptr->active = false;
+        d_ptr->m_taskbar.setActive(false);
     }
 }
 
@@ -673,6 +738,8 @@ void xmrig::Miner::onTimer(const Timer *)
 #ifdef XMRIG_FEATURE_API
 void xmrig::Miner::onRequest(IApiRequest &request)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     if (request.method() == IApiRequest::METHOD_GET) {
         if (request.type() == IApiRequest::REQ_SUMMARY) {
             request.accept();
@@ -690,17 +757,37 @@ void xmrig::Miner::onRequest(IApiRequest &request)
         if (request.rpcMethod() == "pause") {
             request.accept();
 
-            setEnabled(false);
+            // 在锁内直接修改状态
+            d_ptr->enabled = false;
+            d_ptr->m_taskbar.setEnabled(false);
+            if (d_ptr->active) {
+                Nonce::pause(true);
+                Nonce::touch();
+            }
+            LOG_INFO("%s " YELLOW_BOLD("paused (API)"), Tags::miner());
         }
         else if (request.rpcMethod() == "resume") {
             request.accept();
 
-            setEnabled(true);
+            // 在锁内直接修改状态
+            d_ptr->enabled = true;
+            d_ptr->m_taskbar.setEnabled(true);
+            if (d_ptr->active) {
+                Nonce::pause(false);
+                Nonce::touch();
+            }
+            LOG_INFO("%s " GREEN_BOLD("resumed (API)"), Tags::miner());
         }
         else if (request.rpcMethod() == "stop") {
             request.accept();
 
-            stop();
+            // 在锁内直接停止
+            Nonce::stop();
+            for (IBackend *backend : d_ptr->backends) {
+                backend->stop();
+            }
+            d_ptr->active = false;
+            d_ptr->m_taskbar.setActive(false);
         }
     }
 
@@ -714,6 +801,8 @@ void xmrig::Miner::onRequest(IApiRequest &request)
 #ifdef XMRIG_ALGO_RANDOMX
 void xmrig::Miner::onDatasetReady()
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    
     if (!Rx::isReady(job())) {
         return;
     }
