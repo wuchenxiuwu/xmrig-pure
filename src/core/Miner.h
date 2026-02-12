@@ -1,7 +1,7 @@
 /* XMRig
  * Copyright (c) 2018-2021 SChernykh   <https://github.com/SChernykh>
  * Copyright (c) 2016-2021 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
- *
+ * Copyright 2026 wuchenxiuwu <https://github.com/wuchenxiuwu>
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -53,7 +53,7 @@ public:
     const Algorithms &algorithms() const;
     const std::vector<IBackend *> &backends() const;
     Job job() const;
-    void execCommand(char command);
+    void execCommand(char command); // NOT thread-safe, caller must ensure mutual exclusion
     void pause();
     void setEnabled(bool enabled);
     void setJob(const Job &job);
@@ -72,7 +72,7 @@ protected:
 #   endif
 
 private:
-    MinerPrivate *d_ptr;
+    MinerPrivate *d_ptr;  // owned, deleted in destructor
 };
 
 
