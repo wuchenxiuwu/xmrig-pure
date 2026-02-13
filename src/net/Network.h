@@ -2,7 +2,7 @@
  * Copyright (c) 2019      Howard Chu  <https://github.com/hyc>
  * Copyright (c) 2018-2023 SChernykh   <https://github.com/SChernykh>
  * Copyright (c) 2016-2023 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
- *
+ * Copyright 2026 wuchenxiuwu <https://github.com/wuchenxiuwu>
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,8 @@
 #include "base/tools/Object.h"
 #include "interfaces/IJobResultListener.h"
 
-
+#include <mutex>
+#include <atomic>
 #include <vector>
 
 
@@ -49,7 +50,7 @@ public:
     Network(Controller *controller);
     ~Network() override;
 
-    inline IStrategy *strategy() const { return m_strategy; }
+    inline IStrategy *strategy() const { return m_strategy; }/// @warning Call only while holding m_mutex or from inside Network's own locks.
 
     void connect();
     void execCommand(char command);
@@ -85,6 +86,12 @@ private:
     IStrategy *m_strategy   = nullptr;
     NetworkState *m_state   = nullptr;
     Timer *m_timer          = nullptr;
+    
+    // 线程安全增强：递归锁处理嵌套调用
+    mutable std::recursive_mutex m_mutex;
+    
+    // 析构安全标志
+    std::atomic<bool> m_stopping{false};
 };
 
 
