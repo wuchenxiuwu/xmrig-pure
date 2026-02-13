@@ -2,7 +2,7 @@
  * Copyright (c) 2019      Howard Chu  <https://github.com/hyc>
  * Copyright (c) 2018-2023 SChernykh   <https://github.com/SChernykh>
  * Copyright (c) 2016-2023 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
- *
+ * Copyright 2026 wuchenxiuwu <https://github.com/wuchenxiuwu>
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -21,6 +21,7 @@
 #pragma warning(disable:4244)
 #endif
 
+#include <thread>
 #include "net/Network.h"
 #include "3rdparty/rapidjson/document.h"
 #include "backend/common/Tags.h"
@@ -54,11 +55,13 @@
 #include <ctime>
 #include <iterator>
 #include <memory>
+#include <cassert>
 #include "base/kernel/interfaces/IStrategy.h"
 
 
 xmrig::Network::Network(Controller *controller) :
-    m_controller(controller)
+    m_controller(controller),
+    m_stopping(false)
 {
     JobResults::setListener(this, controller->config()->cpu().isHwAES());
     controller->addListener(this);
@@ -78,8 +81,16 @@ xmrig::Network::Network(Controller *controller) :
 
 xmrig::Network::~Network()
 {
+    // 先设置停止标志，防止回调进来
+    m_stopping.store(true, std::memory_order_release);
+    
+    // 停止JobResults回调
     JobResults::stop();
-
+    
+    // 等待可能的回调完成（简单延迟，更精确需要条件变量）
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    
+    // 现在可以安全删除
     delete m_timer;
     delete m_strategy;
     delete m_state;
@@ -88,12 +99,19 @@ xmrig::Network::~Network()
 
 void xmrig::Network::connect()
 {
-    m_strategy->connect();
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    // 检查策略对象是否存在
+    if (m_strategy && !m_stopping.load(std::memory_order_acquire)) {
+        m_strategy->connect();
+    }
 }
 
 
 void xmrig::Network::execCommand(char command)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
     switch (command) {
     case 's':
     case 'S':
@@ -113,6 +131,7 @@ void xmrig::Network::execCommand(char command)
 
 void xmrig::Network::onActive(IStrategy *strategy, IClient *client)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
     const auto &pool = client->pool();
 
@@ -140,6 +159,8 @@ void xmrig::Network::onActive(IStrategy *strategy, IClient *client)
 
 void xmrig::Network::onConfigChanged(Config *config, Config *previousConfig)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
     if (config->pools() == previousConfig->pools() || !config->pools().active()) {
         return;
     }
@@ -150,26 +171,53 @@ void xmrig::Network::onConfigChanged(Config *config, Config *previousConfig)
 
     delete m_strategy;
     m_strategy = config->pools().createStrategy(m_state);
-    connect();
+    
+    // 安全连接
+    if (!m_stopping.load(std::memory_order_acquire)) {
+        m_strategy->connect();
+    }
 }
 
 
 void xmrig::Network::onJob(IStrategy *strategy, IClient *client, const Job &job, const rapidjson::Value &)
 {
-
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    // 安全检查：如果正在停止，不处理新任务
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     setJob(client, job);
 }
 
 
 void xmrig::Network::onJobResult(const JobResult &result)
 {
-
+    // 检查停止标志
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    // 再次检查（双检查锁模式）
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     m_strategy->submit(result);
 }
 
 
 void xmrig::Network::onLogin(IStrategy *, IClient *client, rapidjson::Document &doc, rapidjson::Value &params)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     using namespace rapidjson;
     auto &allocator = doc.GetAllocator();
 
@@ -194,7 +242,12 @@ void xmrig::Network::onLogin(IStrategy *, IClient *client, rapidjson::Document &
 
 void xmrig::Network::onPause(IStrategy *strategy)
 {
-
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     if (!m_strategy->isActive()) {
         LOG_ERR("%s " RED("no active pools, stop mining"), Tags::network());
 
@@ -205,6 +258,12 @@ void xmrig::Network::onPause(IStrategy *strategy)
 
 void xmrig::Network::onResultAccepted(IStrategy *, IClient *, const SubmitResult &result, const char *error)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     uint64_t diff     = result.diff;
     const char *scale = NetworkState::scaleDiff(diff);
 
@@ -221,6 +280,13 @@ void xmrig::Network::onResultAccepted(IStrategy *, IClient *, const SubmitResult
 
 void xmrig::Network::onVerifyAlgorithm(IStrategy *, const IClient *, const Algorithm &algorithm, bool *ok)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        *ok = false;
+        return;
+    }
+    
     if (!m_controller->miner()->isEnabled(algorithm)) {
         *ok = false;
 
@@ -232,6 +298,13 @@ void xmrig::Network::onVerifyAlgorithm(IStrategy *, const IClient *, const Algor
 #ifdef XMRIG_FEATURE_API
 void xmrig::Network::onRequest(IApiRequest &request)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        request.done(500);
+        return;
+    }
+    
     if (request.type() == IApiRequest::REQ_SUMMARY) {
         request.accept();
 
@@ -244,6 +317,17 @@ void xmrig::Network::onRequest(IApiRequest &request)
 
 void xmrig::Network::setJob(IClient *client, const Job &job)
 {
+    // 安全检查：确保在持有锁的情况下调用
+    // 注：由于这是私有函数，只在已加锁的onJob中调用，所以我们保持断言
+    // 但在release构建中可能会被优化掉，所以我们保留注释说明
+    
+    // assert(!"setJob must be called with m_mutex held");
+    // 实际代码中我们依赖调用者保证，这里只做状态检查
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
 #   ifdef XMRIG_FEATURE_BENCHMARK
     if (!BenchState::size())
 #   endif
@@ -277,6 +361,12 @@ void xmrig::Network::setJob(IClient *client, const Job &job)
 
 void xmrig::Network::tick()
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
+    if (m_stopping.load(std::memory_order_acquire)) {
+        return;
+    }
+    
     const uint64_t now = Chrono::steadyMSecs();
 
     m_strategy->tick(now);
@@ -290,6 +380,8 @@ void xmrig::Network::tick()
 #ifdef XMRIG_FEATURE_API
 void xmrig::Network::getConnection(rapidjson::Value &reply, rapidjson::Document &doc, int version) const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
     using namespace rapidjson;
     auto &allocator = doc.GetAllocator();
 
@@ -300,6 +392,8 @@ void xmrig::Network::getConnection(rapidjson::Value &reply, rapidjson::Document 
 
 void xmrig::Network::getResults(rapidjson::Value &reply, rapidjson::Document &doc, int version) const
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    
     using namespace rapidjson;
     auto &allocator = doc.GetAllocator();
 
