@@ -1,0 +1,86 @@
+name: CMake on multiple platforms
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Release]
+        c_compiler: [gcc, clang, cl]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Install dependencies (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update
+        sudo apt install -y libuv1-dev libssl-dev libhwloc-dev
+
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        vcpkg install libuv openssl hwloc
+      shell: pwsh
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        CMAKE_OPTIONS="-B ${{ steps.strings.outputs.build-output-dir }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}"
+
+        # 启用所有功能选项（根据项目 CMakeLists 中的 option）
+        FEATURES="WITH_HWLOC WITH_CN_LITE WITH_CN_HEAVY WITH_CN_PICO WITH_CN_FEMTO WITH_RANDOMX WITH_ARGON2 WITH_KAWPOW WITH_GHOSTRIDER WITH_HTTP WITH_DEBUG_LOG WITH_TLS WITH_ASM WITH_MSR WITH_ENV_VARS WITH_OPENCL WITH_CUDA WITH_NVML WITH_ADL WITH_STRICT_CACHE WITH_INTERLEAVE_DEBUG_LOG WITH_PROFILING WITH_SSE4_1 WITH_AVX2 WITH_VAES WITH_BENCHMARK WITH_SECURE_JIT WITH_DMI BUILD_STATIC HWLOC_DEBUG"
+
+        for feat in $FEATURES; do
+          CMAKE_OPTIONS="$CMAKE_OPTIONS -D$feat=ON"
+        done
+
+        # Windows 需要指定 vcpkg 工具链
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        fi
+
+        echo "Running cmake with options: $CMAKE_OPTIONS"
+        cmake $CMAKE_OPTIONS -S ${{ github.workspace }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+    # XMRig 没有使用 CTest，注释测试步骤
+    # - name: Test
+    #   working-directory: ${{ steps.strings.outputs.build-output-dir }}
+    #   run: ctest --build-config ${{ matrix.build_type }}
